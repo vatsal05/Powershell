@@ -1,0 +1,16 @@
+$path=get-childitem sqlserver:\sql\localhost\|select-object -Expandproperty BackupDirectory
+$filename=get-childitem $path|select-object -expandproperty name
+echo $path
+echo $filename
+$result=$filename -like "*certificate*"|select-object
+echo $result
+if ($result -eq 'true'){
+$location=Get-ChildItem -Path "SQLSERVER:\SQL\$env:COMPUTERNAME" | select-object -ExpandProperty  BackupDirectory
+$filename=get-childitem $location|select-object -ExpandProperty Name
+$file=$location + "\" + $filename
+$password='****'
+$Query="RESTORE SERVICE MASTER KEY FROM FILE = '$file' DECRYPTION BY PASSWORD = '$password'"
+Invoke-Sqlcmd -ServerInstance 'localhost' -Database 'master' -Query $Query
+}else{
+write-host('exit')
+}
